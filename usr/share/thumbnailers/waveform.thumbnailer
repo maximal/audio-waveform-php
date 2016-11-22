@@ -1,0 +1,10 @@
+###
+#
+# @author MaximAL
+# @link https://github.com/maximal/audio-waveform-php
+# @since 2016-11-21
+###
+
+[Thumbnailer Entry]
+Exec=/path/to/maximal/audio/thumbnailer.php %i %o %sx%s
+MimeType=audio/wave;audio/x-wav;audio/mpeg;audio/ogg

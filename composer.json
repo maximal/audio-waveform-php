@@ -1,0 +1,27 @@
+{
+	"name": "maximal/audio-waveform",
+	"type": "library",
+	"description": "Audio waveform generator on PHP with SoX",
+	"keywords": ["audio", "waveform", "generator", "sox"],
+	"homepage": "https://github.com/maximal/audio-waveform-php#readme",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "MaximAL",
+			"homepage": "http://maximals.ru",
+			"role": "Author"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/maximal/audio-waveform-php/issues",
+		"source": "https://github.com/maximal/audio-waveform-php"
+	},
+	"require": {
+		"php": ">=5.6.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"maximal\\audio\\": ""
+		}
+	}
+}
