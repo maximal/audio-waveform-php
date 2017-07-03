@@ -102,7 +102,7 @@ $success = $waveform->getWaveform('thumbnail.png', 1024, 512);
 
 ## Contact the author
 
- * Website: http://maximals.ru (Russian)
- * Sijeko Company: http://sijeko.ru (web, mobile, desktop applications development and graphic design)
+ * Website: https://maximals.ru (Russian)
+ * Sijeko Company: https://sijeko.ru (web, mobile, desktop applications development and graphic design)
  * Personal GitHub: https://github.com/maximal
  * Company’s GitHub: https://github.com/sijeko
