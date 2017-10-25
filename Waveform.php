@@ -60,7 +60,7 @@ class Waveform
 		}
 		
 		if ($this->samples && $this->sampleRate) {
-			$this->duration = 1.0 * $this->samples / $this->samples;
+			$this->duration = 1.0 * $this->samples / $this->sampleRate;
 		}
 		
 		if ($ret !== 0) {
