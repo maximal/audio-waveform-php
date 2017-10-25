@@ -5,10 +5,13 @@
 
 ## Install
 
-Install SoX and some of its handlers for different audio formats. For example, on Ubuntu:
+Install SoX and some of its handlers for different audio formats.
+Also you need a `GD` module or other extension providing `imagecreatetruecolor()` functionality.
+For example, on Ubuntu:
 
 ```sh
 sudo apt install sox libsox-fmt-all
+sudo apt install php-gd
 ```
 
 Install this package using the [Composer](https://getcomposer.org) `require` command:
