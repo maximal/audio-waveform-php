@@ -17,7 +17,8 @@
 		"source": "https://github.com/maximal/audio-waveform-php"
 	},
 	"require": {
-		"php": ">=5.6.0"
+		"php": ">=5.6.0",
+		"ext-gd": "*"
 	},
 	"autoload": {
 		"psr-4": {
