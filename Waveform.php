@@ -43,26 +43,26 @@ class Waveform
 		$ret = null;
 		exec('sox --i ' . escapeshellarg($this->filename) . ' 2>&1', $out, $ret);
 		$str = implode('|', $out);
-		
+
 		$match = null;
 		if (preg_match('/Channels?\s*\:\s*(\d+)/ui', $str, $match)) {
 			$this->channels = intval($match[1]);
 		}
-		
+
 		$match = null;
 		if (preg_match('/Sample\s*Rate\s*\:\s*(\d+)/ui', $str, $match)) {
 			$this->sampleRate = intval($match[1]);
 		}
-		
+
 		$match = null;
 		if (preg_match('/Duration.*[^\d](\d+)\s*samples?/ui', $str, $match)) {
 			$this->samples = intval($match[1]);
 		}
-		
+
 		if ($this->samples && $this->sampleRate) {
 			$this->duration = 1.0 * $this->samples / $this->sampleRate;
 		}
-		
+
 		if ($ret !== 0) {
 			throw new \Exception('Failed to get audio info.' . PHP_EOL . 'Error: ' . implode(PHP_EOL, $out) . PHP_EOL);
 		}
