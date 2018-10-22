@@ -3,6 +3,7 @@
  *
  *
  * @author MaximAL
+ * @since 2018-10-22 Added `getWaveformData()` method and `$soxCommand` configuration
  * @since 2016-11-21
  * @date 2016-11-21
  * @time 19:08
@@ -31,6 +32,9 @@ class Waveform
 	public static $backgroundColor = [245, 245, 245, 1];
 	public static $axisColor = [0, 0, 0, 0.1];
 
+	// SoX command: 'sox', '/usr/local/bin/sox' etc
+	public static $soxCommand = 'sox';
+
 
 	public function __construct($filename)
 	{
@@ -41,7 +45,7 @@ class Waveform
 	{
 		$out = null;
 		$ret = null;
-		exec('sox --i ' . escapeshellarg($this->filename) . ' 2>&1', $out, $ret);
+		exec(self::$soxCommand . ' --i ' . escapeshellarg($this->filename) . ' 2>&1', $out, $ret);
 		$str = implode('|', $out);
 
 		$match = null;
@@ -100,62 +104,13 @@ class Waveform
 		return $this->duration;
 	}
 
-
 	public function getWaveform($filename, $width, $height)
 	{
 		// Calculating parameters
 		$needChannels = $this->getChannels() > 1 ? 2 : 1;
-		$samplesPerPixel = self::$samplesPerLine * self::$linesPerPixel;
-		$needRate = 1.0 * $width * $samplesPerPixel * $this->getSampleRate() / $this->getSamples();
-
-		//if ($needRate > 4000) {
-		//	$needRate = 4000;
-		//}
-
-		// Command text
-		$command = 'sox ' . escapeshellarg($this->filename) .
-			' -c ' . $needChannels .
-			' -r ' . $needRate . ' -e floating-point -t raw -';
-
-		//var_dump($command);
-
-		$outputs = [
-			1 => ['pipe', 'w'],  // stdout
-			2 => ['pipe', 'w'],  // stderr
-		];
-		$pipes = null;
-		$proc = proc_open($command, $outputs, $pipes);
-		if (!$proc) {
-			throw new \Exception('Failed to run sox command');
-		}
-
-		$lines1 = [];
-		$lines2 = [];
-		while ($chunk = fread($pipes[1], 4 * $needChannels * self::$samplesPerLine)) {
-			$data = unpack('f*', $chunk);
-			$channel1 = [];
-			$channel2 = [];
-			foreach ($data as $index => $sample) {
-				if ($needChannels === 2 && $index % 2 === 0) {
-					$channel2 []= $sample;
-				} else {
-					$channel1 []= $sample;
-				}
-			}
-			$lines1 []= min($channel1);
-			$lines1 []= max($channel1);
-			if ($needChannels === 2) {
-				$lines2 []= min($channel2);
-				$lines2 []= max($channel2);
-			}
-		}
-
-		$err = stream_get_contents($pipes[2]);
-		$ret = proc_close($proc);
-
-		if ($ret !== 0) {
-			throw new \Exception('Failed to run `sox` command. Error:' . PHP_EOL . $err);
-		}
+		$data = $this->getWaveformData($width);
+		$lines1 = $data['lines1'];
+		$lines2 = $data['lines2'];
 
 		// Creating image
 		$img = imagecreatetruecolor($width, $height);
@@ -198,6 +153,65 @@ class Waveform
 		}
 
 		return imagepng($img, $filename);
+	}
+
+	public function getWaveformData($width)
+	{
+		// Calculating parameters
+		$needChannels = $this->getChannels() > 1 ? 2 : 1;
+		$samplesPerPixel = self::$samplesPerLine * self::$linesPerPixel;
+		$needRate = 1.0 * $width * $samplesPerPixel * $this->getSampleRate() / $this->getSamples();
+
+		//if ($needRate > 4000) {
+		//	$needRate = 4000;
+		//}
+
+		// Command text
+		$command = self::$soxCommand . ' ' . escapeshellarg($this->filename) .
+			' -c ' . $needChannels .
+			' -r ' . $needRate . ' -e floating-point -t raw -';
+
+		//var_dump($command);
+
+		$outputs = [
+			1 => ['pipe', 'w'],  // stdout
+			2 => ['pipe', 'w'],  // stderr
+		];
+		$pipes = null;
+		$proc = proc_open($command, $outputs, $pipes);
+		if (!$proc) {
+			throw new \Exception('Failed to run `sox` command');
+		}
+
+		$lines1 = [];
+		$lines2 = [];
+		while ($chunk = fread($pipes[1], 4 * $needChannels * self::$samplesPerLine)) {
+			$data = unpack('f*', $chunk);
+			$channel1 = [];
+			$channel2 = [];
+			foreach ($data as $index => $sample) {
+				if ($needChannels === 2 && $index % 2 === 0) {
+					$channel2 []= $sample;
+				} else {
+					$channel1 []= $sample;
+				}
+			}
+			$lines1 []= min($channel1);
+			$lines1 []= max($channel1);
+			if ($needChannels === 2) {
+				$lines2 []= min($channel2);
+				$lines2 []= max($channel2);
+			}
+		}
+
+		$err = stream_get_contents($pipes[2]);
+		$ret = proc_close($proc);
+
+		if ($ret !== 0) {
+			throw new \Exception('Failed to run `sox` command. Error:' . PHP_EOL . $err);
+		}
+
+		return ['lines1' => $lines1, 'lines2' => $lines2];
 	}
 
 	public static function rgbaToColor($img, $rgba)

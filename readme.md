@@ -103,6 +103,20 @@ $success = $waveform->getWaveform('thumbnail.png', 1024, 512);
    By default they are WAV, MP3 and OGG files.
 
 
+## Integration with other libraries (e.g. wavesurfer.js)
+
+`Waveform` class has `getWaveformData()` method for retrieving the waveform data without generating the image.
+You can use it to integrate with different libraries, for instance, with the great
+[wavesurfer.js](https://wavesurfer-js.org/).
+
+```php
+$waveform = new Waveform('track.mp3');
+$width = 1024;
+$data = $waveform->getWaveformData($width);
+// $data['lines1'] and $data['lines2'] now have the waveform data for channels 1 and 2
+```
+
+
 ## Contact the author
 
  * Website: https://maximals.ru (Russian)
