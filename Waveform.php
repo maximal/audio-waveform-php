@@ -155,7 +155,7 @@ class Waveform
 		return imagepng($img, $filename);
 	}
 
-	public function getWaveformData($width)
+	public function getWaveformData($width, $positivePhaseOnly = false)
 	{
 		// Calculating parameters
 		$needChannels = $this->getChannels() > 1 ? 2 : 1;
@@ -196,10 +196,14 @@ class Waveform
 					$channel1 []= $sample;
 				}
 			}
-			$lines1 []= min($channel1);
+			if (!$positivePhaseOnly) {
+                $lines1 []= min($channel1);
+            }
 			$lines1 []= max($channel1);
 			if ($needChannels === 2) {
-				$lines2 []= min($channel2);
+                if (!$positivePhaseOnly) {
+                    $lines2 [] = min($channel2);
+                }
 				$lines2 []= max($channel2);
 			}
 		}
