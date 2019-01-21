@@ -202,7 +202,7 @@ class Waveform
 			$lines1 []= max($channel1);
 			if ($needChannels === 2) {
                 if (!$positivePhaseOnly) {
-                    $lines2 [] = min($channel2);
+                    $lines2 []= min($channel2);
                 }
 				$lines2 []= max($channel2);
 			}
