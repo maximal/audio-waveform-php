@@ -16,6 +16,10 @@
 
 namespace maximal\audio;
 
+/**
+ * Waveform class allows you to get waveform data and images from audio files
+ * @package maximal\audio
+ */
 class Waveform
 {
 	protected $filename;
@@ -105,6 +109,15 @@ class Waveform
 		return $this->duration;
 	}
 
+	/**
+	 * Get waveform from the audio file.
+	 * @param string $filename Audio file name
+	 * @param int $width Width of the image file in pixels
+	 * @param int $height Height of the image file in pixels
+	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
+	 * @return bool Returns `true` on success or `false` on failure.
+	 * @throws \Exception
+	 */
 	public function getWaveform($filename, $width, $height, $onePhase = false)
 	{
 		// Calculating parameters
@@ -169,6 +182,13 @@ class Waveform
 		return imagepng($img, $filename);
 	}
 
+	/**
+	 * Get waveform data from the audio file.
+	 * @param int $width Desired width of the image file in pixels
+	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
+	 * @return array
+	 * @throws \Exception
+	 */
 	public function getWaveformData($width, $onePhase = false)
 	{
 		// Calculating parameters

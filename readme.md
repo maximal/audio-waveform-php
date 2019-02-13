@@ -48,6 +48,20 @@ $waveform = new Waveform('track.mp3');
 $success = $waveform->getWaveform('thumbnail.png', 1024, 512);
 ```
 
+### One Phase
+To get positive waveform only (i.e. one phase) pass `onePhase` parameter set to `true`:
+```php
+$waveform->getWaveform('one-phase.png', 800, 400, true);
+```
+
+Stereo source:
+
+![One phase stereo](one-phase-stereo.png)
+
+Mono source:
+
+![One phase stereo](one-phase-mono.png)
+
 
 ## Settings
 
@@ -114,6 +128,12 @@ $waveform = new Waveform('track.mp3');
 $width = 1024;
 $data = $waveform->getWaveformData($width);
 // $data['lines1'] and $data['lines2'] now have the waveform data for channels 1 and 2
+```
+
+To get positive values only (i.e. one phase) pass `onePhase` parameter set to `true`:
+
+```php
+$data = $waveform->getWaveformData($width, true);
 ```
 
 
