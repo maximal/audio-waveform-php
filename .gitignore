@@ -1,0 +1,6 @@
+# IDEA files
+.idea
+
+# Audio files
+*.ogg
+*.mp3
