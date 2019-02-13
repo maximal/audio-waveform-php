@@ -33,7 +33,7 @@ if (count($argv) < 3) {
 	echo 'Error: audio and thumbnail files not specified!', PHP_EOL;
 	echo 'Usage: php ', $argv[0],
 		'    <audio file>    <thumbnail file>    [<thumbnail size in pixels, default is ',
-		$width, '×', $height, '>]',
+		$width, '×', $height, '>]    [two-phase|positive, default is `two-phase`]',
 		PHP_EOL;
 	exit(1);
 }
@@ -57,6 +57,14 @@ if (count($argv) > 3) {
 	}
 }
 
+// Parsing phase setting
+$onePhase = false;
+if (count($argv) > 4) {
+	if (strtolower($argv[4]) === 'positive') {
+		$onePhase = true;
+	}
+}
+
 if (!is_file($filename)) {
 	echo 'Error: file «', $filename, '» not found!', PHP_EOL;
 	exit(3);
@@ -67,7 +75,7 @@ $waveform = new Waveform($filename);
 // Some settings
 //Waveform::$color = [255, 0, 0, 0.5];
 //Waveform::$backgroundColor = [0, 0, 0, 0];
-if (!$waveform->getWaveform($thumbnail, $width, $height)) {
+if (!$waveform->getWaveform($thumbnail, $width, $height, $onePhase)) {
 	exit(4);
 }
 

@@ -3,6 +3,7 @@
  *
  *
  * @author MaximAL
+ * @since 2019-02-13 Added `$onePhase` parameters to get only positive waveform data and image
  * @since 2018-10-22 Added `getWaveformData()` method and `$soxCommand` configuration
  * @since 2016-11-21
  * @date 2016-11-21
@@ -10,11 +11,15 @@
  * @link http://maximals.ru
  * @link http://sijeko.ru
  * @link https://github.com/maximal/audio-waveform-php
- * @copyright © MaximAL, Sijeko 2016
+ * @copyright © MaximAL, Sijeko 2016-2019
  */
 
 namespace maximal\audio;
 
+/**
+ * Waveform class allows you to get waveform data and images from audio files
+ * @package maximal\audio
+ */
 class Waveform
 {
 	protected $filename;
@@ -104,11 +109,20 @@ class Waveform
 		return $this->duration;
 	}
 
-	public function getWaveform($filename, $width, $height)
+	/**
+	 * Get waveform from the audio file.
+	 * @param string $filename Audio file name
+	 * @param int $width Width of the image file in pixels
+	 * @param int $height Height of the image file in pixels
+	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
+	 * @return bool Returns `true` on success or `false` on failure.
+	 * @throws \Exception
+	 */
+	public function getWaveform($filename, $width, $height, $onePhase = false)
 	{
 		// Calculating parameters
 		$needChannels = $this->getChannels() > 1 ? 2 : 1;
-		$data = $this->getWaveformData($width);
+		$data = $this->getWaveformData($width, $onePhase);
 		$lines1 = $data['lines1'];
 		$lines2 = $data['lines2'];
 
@@ -126,24 +140,37 @@ class Waveform
 		imagefill($img, 0, 0, $back);
 
 		// Center Ys
-		$center1 = $needChannels === 2 ? ($height / 2 - 1) / 2 : $height / 2;
-		$center2 = $needChannels === 2 ? $height - $center1 : null;
+		if ($onePhase) {
+			$center1 = $needChannels === 2 ? $height / 2 - 1: $height - 1;
+			$center2 = $needChannels === 2 ? $height - 1 : null;
+		} else {
+			$center1 = $needChannels === 2 ? ($height / 2 - 1) / 2 : $height / 2;
+			$center2 = $needChannels === 2 ? $height - $center1 : null;
+		}
 
 		// Drawing channel 1
 		for ($i = 0; $i < count($lines1); $i += 2) {
-			$min = $lines1[$i];
-			$max = $lines1[$i+1];
 			$x = $i / 2 / self::$linesPerPixel;
-
-			imageline($img, $x, $center1 - $min * $center1, $x, $center1 - $max * $center1, $color);
+			if ($onePhase) {
+				$max = max($lines1[$i], $lines1[$i + 1]);
+				imageline($img, $x, $center1, $x, $center1 - $max * $center1, $color);
+			} else {
+				$min = $lines1[$i];
+				$max = $lines1[$i + 1];
+				imageline($img, $x, $center1 - $min * $center1, $x, $center1 - $max * $center1, $color);
+			}
 		}
 		// Drawing channel 2
 		for ($i = 0; $i < count($lines2); $i += 2) {
-			$min = $lines2[$i];
-			$max = $lines2[$i + 1];
 			$x = $i / 2 / self::$linesPerPixel;
-
-			imageline($img, $x, $center2 - $min * $center1, $x, $center2 - $max * $center1, $color);
+			if ($onePhase) {
+				$max = max($lines2[$i], $lines2[$i + 1]);
+				imageline($img, $x, $center2, $x, $center2 - $max * $center1, $color);
+			} else {
+				$min = $lines2[$i];
+				$max = $lines2[$i + 1];
+				imageline($img, $x, $center2 - $min * $center1, $x, $center2 - $max * $center1, $color);
+			}
 		}
 
 		// Axis
@@ -155,7 +182,14 @@ class Waveform
 		return imagepng($img, $filename);
 	}
 
-	public function getWaveformData($width, $positivePhaseOnly = false)
+	/**
+	 * Get waveform data from the audio file.
+	 * @param int $width Desired width of the image file in pixels
+	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function getWaveformData($width, $onePhase = false)
 	{
 		// Calculating parameters
 		$needChannels = $this->getChannels() > 1 ? 2 : 1;
@@ -196,15 +230,22 @@ class Waveform
 					$channel1 []= $sample;
 				}
 			}
-			if (!$positivePhaseOnly) {
-                $lines1 []= min($channel1);
-            }
-			$lines1 []= max($channel1);
-			if ($needChannels === 2) {
-                if (!$positivePhaseOnly) {
-                    $lines2 []= min($channel2);
-                }
-				$lines2 []= max($channel2);
+			if ($onePhase) {
+				// Rectifying to get positive values only
+				$lines1 []= abs(min($channel1));
+				$lines1 []= abs(max($channel1));
+				if ($needChannels === 2) {
+					$lines2 []= abs(min($channel2));
+					$lines2 []= abs(max($channel2));
+				}
+			} else {
+				// Two phases
+				$lines1 []= min($channel1);
+				$lines1 []= max($channel1);
+				if ($needChannels === 2) {
+					$lines2 []= min($channel2);
+					$lines2 []= max($channel2);
+				}
 			}
 		}
 
