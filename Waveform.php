@@ -111,7 +111,7 @@ class Waveform
 
 	/**
 	 * Get waveform from the audio file.
-	 * @param string $filename Audio file name
+	 * @param string $filename Image file name
 	 * @param int $width Width of the image file in pixels
 	 * @param int $height Height of the image file in pixels
 	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
