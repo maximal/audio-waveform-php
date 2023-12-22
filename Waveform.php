@@ -115,10 +115,11 @@ class Waveform
 	 * @param int $width Width of the image file in pixels
 	 * @param int $height Height of the image file in pixels
 	 * @param bool $onePhase `true` to get positive values only, `false` to get both phases
+	 * @param bool $stereo `true` to generate 2 waveforms, `false` to a single waveform
 	 * @return bool Returns `true` on success or `false` on failure.
 	 * @throws \Exception
 	 */
-	public function getWaveform($filename, $width, $height, $onePhase = false)
+	public function getWaveform($filename, $width, $height, $onePhase = false, $stereo = true)
 	{
 		// Calculating parameters
 		$needChannels = $this->getChannels() > 1 ? 2 : 1;
@@ -149,6 +150,9 @@ class Waveform
 		}
 
 		// Drawing channel 1
+    if (!$stereo) {
+      $center1 = $height / 2;
+    }
 		for ($i = 0; $i < count($lines1); $i += 2) {
 			$x = $i / 2 / self::$linesPerPixel;
 			if ($onePhase) {
@@ -161,21 +165,23 @@ class Waveform
 			}
 		}
 		// Drawing channel 2
-		for ($i = 0; $i < count($lines2); $i += 2) {
-			$x = $i / 2 / self::$linesPerPixel;
-			if ($onePhase) {
-				$max = max($lines2[$i], $lines2[$i + 1]);
-				imageline($img, $x, $center2, $x, $center2 - $max * $center1, $color);
-			} else {
-				$min = $lines2[$i];
-				$max = $lines2[$i + 1];
-				imageline($img, $x, $center2 - $min * $center1, $x, $center2 - $max * $center1, $color);
-			}
-		}
+    if ($stereo) {
+      for ($i = 0; $i < count($lines2); $i += 2) {
+        $x = $i / 2 / self::$linesPerPixel;
+        if ($onePhase) {
+          $max = max($lines2[$i], $lines2[$i + 1]);
+          imageline($img, $x, $center2, $x, $center2 - $max * $center1, $color);
+        } else {
+          $min = $lines2[$i];
+          $max = $lines2[$i + 1];
+          imageline($img, $x, $center2 - $min * $center1, $x, $center2 - $max * $center1, $color);
+        }
+      }
+    }
 
 		// Axis
 		imageline($img, 0, $center1, $width - 1, $center1, $axis);
-		if ($center2 !== null) {
+		if ($stereo && $center2 !== null) {
 			imageline($img, 0, $center2, $width - 1, $center2, $axis);
 		}
 
